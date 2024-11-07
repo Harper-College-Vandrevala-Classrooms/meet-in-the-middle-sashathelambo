@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <algorithm>
 
 using namespace std;
 
@@ -22,26 +23,37 @@ double findMedian(const vector<int>& numbers) {
 
 vector<int> readNumbersFromCSV(const string& filename) {
     ifstream file(filename);
+    
+   
     auto numbers = make_unique<vector<int>>();
+    if (numbers == nullptr) {
+        throw runtime_error("Failed to allocate memory");
+    }
     
     if (!file.is_open()) {
         throw runtime_error("Could not open file: " + filename);
     }
     
     string line;
+    size_t count = 0;
     if (getline(file, line)) {
         size_t start = 0;
         size_t end = line.find(',');
         
         while (end != string::npos) {
             numbers->push_back(stoi(line.substr(start, end - start)));
+            count++;
             start = end + 1;
             end = line.find(',', start);
         }
         numbers->push_back(stoi(line.substr(start)));
+        count++;
     }
     
     file.close();
+    cout << "Number of data items read: " << count << endl;
+    
+    sort(numbers->begin(), numbers->end());
     return *numbers;
 }
 
