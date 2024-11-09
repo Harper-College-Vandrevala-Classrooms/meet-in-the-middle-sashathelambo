@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <memory>
 
 using namespace std;
 
@@ -20,7 +21,7 @@ double findMedian(const vector<int>& numbers) {
             static_cast<double>(numbers[size / 2])) / 2.0;
 }
 
-vector<int>* readNumbersFromCSV(const string& filename) {
+unique_ptr<vector<int>> readNumbersFromCSV(const string& filename) {
     ifstream file(filename);
     
     if (!file.is_open()) {
@@ -28,7 +29,7 @@ vector<int>* readNumbersFromCSV(const string& filename) {
         return nullptr;
     }
     
-    vector<int>* numbers = new vector<int>();
+    auto numbers = make_unique<vector<int>>();
     string line;
     size_t count = 0;
     if (getline(file, line)) {
@@ -58,13 +59,12 @@ int main() {
     getline(cin, filename);
     
     try {
-        vector<int>* numbersPtr = readNumbersFromCSV(filename);
-        if (numbersPtr == nullptr) {
+        auto numbersPtr = readNumbersFromCSV(filename);
+        if (!numbersPtr) {
             return 1;
         }
         double median = findMedian(*numbersPtr);
         cout << "The median is: " << median << endl;
-        delete numbersPtr; 
     } catch (const exception& e) {
         cerr << "Error: " << e.what() << endl;
         return 1;
