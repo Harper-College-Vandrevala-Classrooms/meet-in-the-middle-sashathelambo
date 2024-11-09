@@ -2,7 +2,6 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <memory>
 #include <algorithm>
 
 using namespace std;
@@ -21,19 +20,15 @@ double findMedian(const vector<int>& numbers) {
             static_cast<double>(numbers[size / 2])) / 2.0;
 }
 
-vector<int> readNumbersFromCSV(const string& filename) {
+vector<int>* readNumbersFromCSV(const string& filename) {
     ifstream file(filename);
     
-   
-    auto numbers = make_unique<vector<int>>();
-    if (numbers == nullptr) {
-        throw runtime_error("Failed to allocate memory");
-    }
-    
     if (!file.is_open()) {
-        throw runtime_error("Could not open file: " + filename);
+        cerr << "Could not open file: " << filename << endl;
+        return nullptr;
     }
     
+    vector<int>* numbers = new vector<int>();
     string line;
     size_t count = 0;
     if (getline(file, line)) {
@@ -54,7 +49,7 @@ vector<int> readNumbersFromCSV(const string& filename) {
     cout << "Number of data items read: " << count << endl;
     
     sort(numbers->begin(), numbers->end());
-    return *numbers;
+    return numbers;
 }
 
 int main() {
@@ -63,9 +58,13 @@ int main() {
     getline(cin, filename);
     
     try {
-        auto numbers = make_unique<vector<int>>(readNumbersFromCSV(filename));
-        double median = findMedian(*numbers);
+        vector<int>* numbersPtr = readNumbersFromCSV(filename);
+        if (numbersPtr == nullptr) {
+            return 1;
+        }
+        double median = findMedian(*numbersPtr);
         cout << "The median is: " << median << endl;
+        delete numbersPtr; 
     } catch (const exception& e) {
         cerr << "Error: " << e.what() << endl;
         return 1;
